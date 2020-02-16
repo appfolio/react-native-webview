@@ -42,6 +42,11 @@ android {
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
     versionCode 1
     versionName "1.0"
+    ndk {
+      abiFilters "armeabi-v7a", "x86"
+      moduleName "reactnativecommunity-webview"
+      ldLibs "log"
+    }
   }
   buildTypes {
     release {
@@ -55,9 +60,19 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
+  sourceSets {
+    main {
+//      java.srcDirs = ["../djinni/java", "src/main/java"]
+//      jni.srcDirs = ["../djinni/jni"]
+      jni.srcDirs = ["src/main/cpp"]
+    }
+  }
   externalNativeBuild {
-    cmake {
-      path "src/main/cpp/CMakeLists.txt"
+//    cmake {
+//      path "src/main/cpp/CMakeLists.txt"
+//    }
+    ndkBuild {
+      path file('src/main/jni/Android.mk')
     }
   }
 }

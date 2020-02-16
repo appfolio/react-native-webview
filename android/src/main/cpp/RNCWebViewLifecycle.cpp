@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "JSIInstaller.h"
+#include "RNCWebViewLifecycle.h"
 
 #define LOG_TAG "JSIInstaller"
 
@@ -99,7 +99,7 @@ std::string jstring2string(JNIEnv *env, jstring jStr) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_reactnativecommunity_webview_jsi_JSIInstaller_installBinding(JNIEnv *env, jobject thiz, jlong runtimePtr)
+Java_com_reactnativecommunity_webview_jsi_Lifecycle_installBinding(JNIEnv *env, jobject thiz, jlong runtimePtr)
 {
   auto &runtime = *(jsi::Runtime *)runtimePtr;
   auto testBinding = std::make_shared<SampleModule>();
@@ -111,13 +111,13 @@ Java_com_reactnativecommunity_webview_jsi_JSIInstaller_installBinding(JNIEnv *en
 
   globalObjectRef = env->NewGlobalRef(thiz);
 
-  auto clazz = env->FindClass("com/reactnativecommunity/webview/jsi/JSIInstaller");
+  auto clazz = env->FindClass("com/reactnativecommunity/webview/jsi/Lifecycle");
 
   globalClassRef = (jclass)env->NewGlobalRef(clazz);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_reactnativecommunity_webview_jsi_JSIInstaller_shouldOverrideUrlLoading(JNIEnv* env, jobject thiz, jlong runtimePtr, jint viewId, jstring url)
+Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest(JNIEnv* env, jobject thiz, jlong runtimePtr, jint viewId, jstring url)
 {
   auto &runtime = *(jsi::Runtime *)runtimePtr;
   auto rncWebViewGlobal = runtime.global().getPropertyAsObject(runtime, "RNCWebView");
