@@ -83,7 +83,7 @@ type State = {restarting: boolean, currentTest: Object};
 export default class App extends Component<Props, State> {
   state = {
     restarting: false,
-    currentTest: TESTS.Alerts,
+    currentTest: TESTS.Downloads,
   };
 
   _simulateRestart = () => {
