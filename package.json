@@ -71,5 +71,8 @@
     "index.js",
     "index.d.ts",
     "react-native-webview.podspec"
-  ]
+  ],
+  "resolutions": {
+    "@react-native-community/cli-platform-android": "3.0.0-alpha.2"
+  }
 }

@@ -12,6 +12,7 @@ import {
 import Alerts from './examples/Alerts';
 import Scrolling from './examples/Scrolling';
 import Background from './examples/Background';
+import Downloads from './examples/Downloads';
 
 const TESTS = {
   Alerts: {
@@ -38,6 +39,14 @@ const TESTS = {
       return <Background />;
     },
   },
+  Downloads: {
+    title: 'Downloads',
+    testId: 'download',
+    description: 'Downloads tests',
+    render() {
+      return <Downloads />;
+    },
+  },
 };
 
 type Props = {};
@@ -46,7 +55,7 @@ type State = {restarting: boolean, currentTest: Object};
 export default class App extends Component<Props, State> {
   state = {
     restarting: false,
-    currentTest: TESTS.Alerts,
+    currentTest: TESTS.Downloads,
   };
 
   _simulateRestart = () => {
@@ -90,6 +99,11 @@ export default class App extends Component<Props, State> {
             testID="testType_background"
             title="Background"
             onPress={() => this._changeTest('Background')}
+          />
+          <Button
+            testID="testType_download"
+            title="Download"
+            onPress={() => this._changeTest('Downloads')}
           />
         </View>
 

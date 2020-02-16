@@ -36,7 +36,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
+import com.facebook.react.bridge.JavaScriptContextHolder;
 import com.facebook.react.views.scroll.ScrollEvent;
 import com.facebook.react.views.scroll.ScrollEventType;
 import com.facebook.react.views.scroll.OnScrollDispatchHelper;
@@ -64,6 +66,7 @@ import com.reactnativecommunity.webview.events.TopLoadingProgressEvent;
 import com.reactnativecommunity.webview.events.TopLoadingStartEvent;
 import com.reactnativecommunity.webview.events.TopMessageEvent;
 import com.reactnativecommunity.webview.events.TopShouldStartLoadWithRequestEvent;
+import com.reactnativecommunity.webview.jsi.JSIInstaller;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -743,12 +746,20 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       activeUrl = url;
-      dispatchEvent(
-        view,
-        new TopShouldStartLoadWithRequestEvent(
-          view.getId(),
-          createWebViewEvent(view, url)));
-      return true;
+      JavaScriptContextHolder jsContext = ((ReactContext)view.getContext()).getJavaScriptContextHolder();
+      synchronized(jsContext) {
+        JSIInstaller jsiInstaller = new JSIInstaller();
+//        jsiInstaller.installBinding(jsContext.get());
+        return jsiInstaller.shouldOverrideUrlLoading(jsContext.get(), view.getId(), url);
+//        Toast.makeText(view.getContext(), Integer.toString(view.getId()), Toast.LENGTH_LONG).show();
+      }
+
+//      dispatchEvent(
+//        view,
+//        new TopShouldStartLoadWithRequestEvent(
+//          view.getId(),
+//          createWebViewEvent(view, url)));
+//      return true;
     }
 
 
