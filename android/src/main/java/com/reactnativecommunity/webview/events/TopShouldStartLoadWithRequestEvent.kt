@@ -5,7 +5,7 @@ import com.facebook.react.uimanager.events.Event
 import com.facebook.react.uimanager.events.RCTEventEmitter
 
 /**
- * Event emitted when shouldOverrideUrlLoading is called
+ * Event emitted when onShouldStartLoadWithRequest is called
  */
 class TopShouldStartLoadWithRequestEvent(viewId: Int, private val mData: WritableMap) : Event<TopShouldStartLoadWithRequestEvent>(viewId) {
   companion object {

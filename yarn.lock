@@ -2940,6 +2940,10 @@ dir-glob@^3.0.0, dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
+djinni@dropbox/djinni#3aa304c155ac6b601688c6ad721e51c2dad7b443:
+  version "0.0.0"
+  resolved "https://codeload.github.com/dropbox/djinni/tar.gz/3aa304c155ac6b601688c6ad721e51c2dad7b443"
+
 doctrine@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-1.5.0.tgz#379dce730f6166f76cefa4e6707a159b02c5a6fa"

@@ -37,6 +37,10 @@ import static android.app.Activity.RESULT_OK;
 
 @ReactModule(name = RNCWebViewModule.MODULE_NAME)
 public class RNCWebViewModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+  static {
+    System.loadLibrary("reactnativecommunity-webview");
+  }
+
   public static final String MODULE_NAME = "RNCWebView";
   private static final int PICKER = 1;
   private static final int PICKER_LEGACY = 3;

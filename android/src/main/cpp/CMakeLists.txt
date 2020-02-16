@@ -15,8 +15,8 @@ add_library(reactnativecommunity-webview-jsi SHARED
     ${PROJECT_SOURCE_DIR}/../../../../node_modules/react-native/ReactCommon/jsi/jsi/jsi.cpp
 
     # source files
-    JSIInstaller.h
-    JSIInstaller.cpp
+  RNCWebViewLifecycle.h
+  RNCWebViewLifecycle.cpp
 )
 
 target_link_libraries(reactnativecommunity-webview-jsi
