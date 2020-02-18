@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
-import WebView from 'react-native-webview';
+import WebView from '../..';
 
 const HTML = `
 <!DOCTYPE html>\n
