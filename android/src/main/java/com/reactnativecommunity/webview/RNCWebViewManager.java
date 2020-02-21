@@ -109,7 +109,6 @@ import javax.annotation.Nullable;
 @ReactModule(name = RNCWebViewManager.REACT_CLASS)
 public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
-  public static String activeUrl = null;
   public static final int COMMAND_GO_BACK = 1;
   public static final int COMMAND_GO_FORWARD = 2;
   public static final int COMMAND_RELOAD = 3;
@@ -619,6 +618,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           throw new RuntimeException("Arguments for loading an url are null!");
         }
         root.loadUrl(args.getString(0));
+        // TODO: This is probably where we should set activeUrl
         break;
       case COMMAND_FOCUS:
         root.requestFocus();
@@ -723,6 +723,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected boolean mLastLoadFailed = false;
     protected @Nullable
     ReadableArray mUrlPrefixesForDefaultIntent;
+    protected ProgressChangedFilter progressChangedFilter = null;
     protected @Nullable String ignoreErrFailedForThisURL = null;
 
     public void setIgnoreErrFailedForThisURL(@Nullable String url) {
@@ -756,7 +757,8 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-      activeUrl = url;
+      // TODO: Move this to where it really should be.
+      progressChangedFilter.navigateToUrl(url);
       dispatchEvent(
         view,
         new TopShouldStartLoadWithRequestEvent(
@@ -853,11 +855,17 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     public void setUrlPrefixesForDefaultIntent(ReadableArray specialUrls) {
       mUrlPrefixesForDefaultIntent = specialUrls;
     }
+
+    public void setProgressChangedFilter(ProgressChangedFilter filter) {
+      progressChangedFilter = filter;
+    }
   }
 
   protected static class RNCWebChromeClient extends WebChromeClient implements LifecycleEventListener {
     protected static final FrameLayout.LayoutParams FULLSCREEN_LAYOUT_PARAMS = new FrameLayout.LayoutParams(
       LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
+
+    protected ProgressChangedFilter progressChangedFilter = null;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     protected static final int FULLSCREEN_SYSTEM_UI_VISIBILITY = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
@@ -928,11 +936,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     public void onProgressChanged(WebView webView, int newProgress) {
       super.onProgressChanged(webView, newProgress);
       final String url = webView.getUrl();
-      if (
-        url != null
-        && activeUrl != null
-        && !url.equals(activeUrl)
-      ) {
+      if (progressChangedFilter.isIrrelevantUrl(url)) {
         return;
       }
       WritableMap event = Arguments.createMap();
@@ -991,6 +995,10 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected ViewGroup getRootView() {
       return (ViewGroup) mReactContext.getCurrentActivity().findViewById(android.R.id.content);
     }
+
+    public void setProgressChangedFilter(ProgressChangedFilter filter) {
+      progressChangedFilter = filter;
+    }
   }
 
   /**
@@ -1010,6 +1018,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected boolean sendContentSizeChangeEvents = false;
     private OnScrollDispatchHelper mOnScrollDispatchHelper;
     protected boolean hasScrollEvent = false;
+    protected ProgressChangedFilter progressChangedFilter;
 
     /**
      * WebView must be created with an context of the current activity
@@ -1019,6 +1028,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
      */
     public RNCWebView(ThemedReactContext reactContext) {
       super(reactContext);
+      progressChangedFilter = new ProgressChangedFilter();
     }
 
     public void setIgnoreErrFailedForThisURL(String url) {
@@ -1069,6 +1079,16 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       super.setWebViewClient(client);
       if (client instanceof RNCWebViewClient) {
         mRNCWebViewClient = (RNCWebViewClient) client;
+        mRNCWebViewClient.setProgressChangedFilter(progressChangedFilter);
+      }
+    }
+
+    @Override
+    public void setWebChromeClient(WebChromeClient client) {
+      super.setWebChromeClient(client);
+      if (client instanceof RNCWebChromeClient) {
+        RNCWebChromeClient rncClient = (RNCWebViewClient) client;
+        rncClient.setProgressChangedFilter(progressChangedFilter);
       }
     }
 
@@ -1229,4 +1249,21 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       }
     }
   }
+
+  protected static class ProgressChangedFilter {
+    private @Nullable String activeUrl = null;
+
+    public ProgressChangedFilter() {}
+
+    public void navigateToUrl(String url) {
+      activeUrl = url;
+    }
+
+    public boolean isIrrelevantUrl(String url) {
+      return url != null
+        && activeUrl != null
+        && !url.equals(activeUrl);
+    }
+  }
+
 }
