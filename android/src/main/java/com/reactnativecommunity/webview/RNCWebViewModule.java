@@ -219,12 +219,19 @@ public class RNCWebViewModule extends ReactContextBaseJavaModule implements Acti
   }
 
   public boolean grantFileDownloaderPermissions() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+    // After Android 10, we don't need permission to save files in downloads directory
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       return true;
     }
 
     boolean result = true;
     if (ContextCompat.checkSelfPermission(getCurrentActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+      // Before Marshmallow, there are no runtime permissions, just based on manifest
+      // We can return early and prevent a crash (but means no download happens)
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+        return false;
+      }
+
       result = false;
     }
 
