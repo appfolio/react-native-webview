@@ -984,28 +984,30 @@ static NSDictionary* customCertificatesForHost;
                     decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler
 {
   WKNavigationResponsePolicy policy = WKNavigationResponsePolicyAllow;
-  if (_onHttpError && navigationResponse.forMainFrame) {
+  if (navigationResponse.forMainFrame) {
     if ([navigationResponse.response isKindOfClass:[NSHTTPURLResponse class]]) {
       NSHTTPURLResponse *response = (NSHTTPURLResponse *)navigationResponse.response;
-      NSInteger statusCode = response.statusCode;
 
-      if (statusCode >= 400) {
-        NSMutableDictionary<NSString *, id> *httpErrorEvent = [self baseEvent];
-        [httpErrorEvent addEntriesFromDictionary: @{
-          @"url": response.URL.absoluteString,
-          @"statusCode": @(statusCode)
-        }];
+      if (_onHttpError) {
+        NSInteger statusCode = response.statusCode;
+        if (statusCode >= 400) {
+          NSMutableDictionary<NSString *, id> *httpErrorEvent = [self baseEvent];
+          [httpErrorEvent addEntriesFromDictionary: @{
+            @"url": response.URL.absoluteString,
+            @"statusCode": @(statusCode)
+          }];
 
-        _onHttpError(httpErrorEvent);
+          _onHttpError(httpErrorEvent);
+        }
       }
 
-      NSString *disposition = nil;
-      if (@available(iOS 13, *)) {
-        disposition = [response valueForHTTPHeaderField:@"Content-Disposition"];
-      }
-      BOOL isAttachment = disposition != nil && [disposition hasPrefix:@"attachment"];
-      if (isAttachment || !navigationResponse.canShowMIMEType) {
-        if (_onFileDownload) {
+      if (_onFileDownload) {
+        NSString *disposition = nil;
+        if (@available(iOS 13, *)) {
+          disposition = [response valueForHTTPHeaderField:@"Content-Disposition"];
+        }
+        BOOL isAttachment = disposition != nil && [disposition hasPrefix:@"attachment"];
+        if (isAttachment || !navigationResponse.canShowMIMEType) {
           policy = WKNavigationResponsePolicyCancel;
 
           NSMutableDictionary<NSString *, id> *downloadEvent = [self baseEvent];
