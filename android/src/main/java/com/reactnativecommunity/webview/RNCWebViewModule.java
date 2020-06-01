@@ -277,7 +277,7 @@ public class RNCWebViewModule extends ReactContextBaseJavaModule implements Acti
 
   public boolean grantFileDownloaderPermissions() {
     // Permission not required for Android Q and above
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    if (Build.VERSION.SDK_INT >= 10) {
       return true;
     }
 
