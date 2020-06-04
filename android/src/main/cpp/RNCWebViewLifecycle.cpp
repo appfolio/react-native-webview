@@ -5,6 +5,8 @@
 
 #define LOG_TAG "JSIInstaller"
 
+#define UNUSED(x) (void)(x);
+
 # ifdef ANDROID
 // LOGS ANDROID
 #   include <android/log.h>
@@ -24,14 +26,6 @@
 #   define LOGE(...) printf("  *** Error:  ");printf(__VA_ARGS__); printf("\t -  <%s> \n", LOG_TAG);
 #   define LOGSIMPLE(...) printf(" ");printf(__VA_ARGS__);
 # endif // ANDROID
-
-// global ref to Java Virtual Machine
-// used to get JNI current env
-JavaVM *jvm;
-// global ref to our class instance
-static jobject globalObjectRef;
-// global ref to our class
-static jclass globalClassRef;
 
 //This is how we represent a Java exception already in progress
 struct ThrownJavaException : std::runtime_error {
@@ -101,6 +95,8 @@ std::string jstring2string(JNIEnv *env, jstring jStr) {
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest(JNIEnv* env, jobject thiz, jlong runtimePtr, jint viewId, jstring url)
 {
+  UNUSED(thiz);
+
   auto *runtime = (jsi::Runtime *)runtimePtr; // TODO: use a c++ style cast
   if (runtime != nullptr) {
     auto rncWebViewGlobal = runtime->global().getPropertyAsObject(*runtime, "RNCWebView");

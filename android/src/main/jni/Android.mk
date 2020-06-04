@@ -10,6 +10,7 @@ LOCAL_CPPFLAGS += -fexceptions
 LOCAL_CPPFLAGS += -frtti
 LOCAL_CPPFLAGS += -Wall
 LOCAL_CPPFLAGS += -Wextra
+LOCAL_CPPFLAGS += -Werror
 
 LOCAL_C_INCLUDES := $(REACT_NATIVE)/ReactCommon/jsi $(LOCAL_PATH)/../cpp
 
