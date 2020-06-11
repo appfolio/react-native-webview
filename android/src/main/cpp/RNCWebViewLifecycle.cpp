@@ -93,20 +93,38 @@ std::string jstring2string(JNIEnv *env, jstring jStr) {
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest(JNIEnv* env, jobject thiz, jlong runtimePtr, jint viewId, jstring url)
+Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest(JNIEnv* env,
+  jobject thiz,
+  jlong runtimePtr,
+  jint viewId,
+  jstring url,
+  jboolean loading,
+  jstring title,
+  jboolean canGoBack,
+  jboolean canGoForward)
 {
   UNUSED(thiz);
+  UNUSED(url);
+  UNUSED(loading);
+  UNUSED(title);
+  UNUSED(canGoBack);
+  UNUSED(canGoForward);
 
   auto *runtime = (jsi::Runtime *)runtimePtr; // TODO: use a c++ style cast
   if (runtime != nullptr) {
     auto rncWebViewGlobal = runtime->global().getPropertyAsObject(*runtime, "RNCWebView");
     std::string functionName = "onShouldStartLoadWithRequest-" + std::to_string(viewId);
     auto onShouldStartLoadWithRequest = rncWebViewGlobal.getPropertyAsFunction(*runtime, functionName.c_str());
+    jsi::Value jLoading = jsi::Value((bool)(loading == JNI_TRUE));
     try {
-      auto result = onShouldStartLoadWithRequest.callWithThis(
+      auto result = onShouldStartLoadWithRequest.call(
         *runtime,
-        runtime->global(),
-        {jsi::String::createFromUtf8(*runtime, jstring2string(env, url))});
+//        {event});
+        {
+          jsi::String::createFromUtf8(*runtime, jstring2string(env, url)),
+          jsi::String::createFromUtf8(*runtime, jstring2string(env, title)),
+          jLoading,
+        });
       return (jboolean)(result.getBool() ? JNI_TRUE : JNI_FALSE);
     } catch (...) {
       swallow_cpp_exception_and_throw_java(env);

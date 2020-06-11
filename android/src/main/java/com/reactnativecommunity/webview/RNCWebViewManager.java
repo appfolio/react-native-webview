@@ -771,7 +771,19 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
         synchronized(jsContext) {
           try {
             Lifecycle lifecycle = new Lifecycle();
-            return lifecycle.onShouldStartLoadWithRequest(jsContext.get(), view.getId(), url);
+            boolean loading = !mLastLoadFailed && view.getProgress() != 100;
+            String title = view.getTitle();
+            boolean canGoBack = view.canGoBack();
+            boolean canGoForward = view.canGoForward();
+            return lifecycle.onShouldStartLoadWithRequest(
+              jsContext.get(),
+              view.getId(),
+              url,
+              loading,
+              title,
+              canGoBack,
+              canGoForward
+            );
           } catch (Exception e) {
             FLog.e(TAG, "Couldn't use native JSI/JNI synchronous call for onShouldStartLoadWithRequest, allowing load to happen", e);
             return false;
