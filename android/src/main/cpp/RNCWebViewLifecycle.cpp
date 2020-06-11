@@ -3,7 +3,7 @@
 
 #include "RNCWebViewLifecycle.h"
 
-#define LOG_TAG "JSIInstaller"
+#define LOG_TAG "RNCWebViewLifecycle"
 
 #define UNUSED(x) (void)(x);
 
@@ -27,7 +27,7 @@
 #   define LOGSIMPLE(...) printf(" ");printf(__VA_ARGS__);
 # endif // ANDROID
 
-//This is how we represent a Java exception already in progress
+// This is how we represent a Java exception already in progress
 struct ThrownJavaException : std::runtime_error {
     ThrownJavaException() :std::runtime_error("") {}
     ThrownJavaException(const std::string& msg ) :std::runtime_error(msg) {}
@@ -38,10 +38,10 @@ inline void assert_no_exception(JNIEnv * env) {
     throw ThrownJavaException("assert_no_exception");
 }
 
-//used to throw a new Java exception. use full paths like:
-//"java/lang/NoSuchFieldException"
-//"java/lang/NullPointerException"
-//"java/security/InvalidParameterException"
+// used to throw a new Java exception. use full paths like:
+// "java/lang/NoSuchFieldException"
+// "java/lang/NullPointerException"
+// "java/security/InvalidParameterException"
 struct NewJavaException : public ThrownJavaException{
     NewJavaException(JNIEnv * env, const char* type="", const char* message="")
       :ThrownJavaException(type+std::string(" ")+message)
@@ -59,7 +59,7 @@ void swallow_cpp_exception_and_throw_java(JNIEnv * env) {
   } catch(const ThrownJavaException&) {
     // already reported to Java, ignore
   } catch(const std::bad_alloc& rhs) {
-    //  translate OOM C++ exception to a Java exception
+    // translate OOM C++ exception to a Java exception
     NewJavaException(env, "java/lang/OutOfMemoryError", rhs.what());
   } catch(const std::ios_base::failure& rhs) { //sample translation
     // translate IO C++ exception to a Java exception
@@ -68,7 +68,7 @@ void swallow_cpp_exception_and_throw_java(JNIEnv * env) {
     // translate unknown C++ exception to a Java exception
     NewJavaException(env, "java/lang/RuntimeException", e.what());
   } catch(...) {
-    //  translate unknown C++ exception to a Java exception
+    // translate unknown C++ exception to a Java exception
     NewJavaException(env, "java/lang/Error", "Unknown exception type");
   }
 }
@@ -116,4 +116,3 @@ Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest
     return JNI_FALSE;
   }
 }
-
