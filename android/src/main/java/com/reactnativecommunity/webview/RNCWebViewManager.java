@@ -37,6 +37,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
+import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.JavaScriptContextHolder;
 import com.facebook.react.views.scroll.ScrollEvent;
 import com.facebook.react.views.scroll.ScrollEventType;
@@ -110,6 +111,7 @@ import javax.annotation.Nullable;
  */
 @ReactModule(name = RNCWebViewManager.REACT_CLASS)
 public class RNCWebViewManager extends SimpleViewManager<WebView> {
+  private static final String TAG = "RNCWebViewManager";
 
   public static final int COMMAND_GO_BACK = 1;
   public static final int COMMAND_GO_FORWARD = 2;
@@ -765,25 +767,25 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       JavaScriptContextHolder jsContext = ((ReactContext)view.getContext()).getJavaScriptContextHolder();
-      synchronized(jsContext) {
-//        WebviewLifecycle webviewLifecycle = WebviewLifecycle.create();
-//        return webviewLifecycle.onShouldStartLoadWithRequest(url);
-        try {
-          Lifecycle lifecycle = new Lifecycle();
-          return lifecycle.onShouldStartLoadWithRequest(jsContext.get(), view.getId(), url);
-        } catch (Exception e) {
-          return false;
+      if (jsContext != null) {
+        synchronized(jsContext) {
+          try {
+            Lifecycle lifecycle = new Lifecycle();
+            return lifecycle.onShouldStartLoadWithRequest(jsContext.get(), view.getId(), url);
+          } catch (Exception e) {
+            FLog.e(TAG, "Couldn't use native JSI/JNI synchronous call for onShouldStartLoadWithRequest, allowing load to happen", e);
+            return false;
+          }
         }
-//        jsiInstaller.installBinding(jsContext.get());
-//        Toast.makeText(view.getContext(), Integer.toString(view.getId()), Toast.LENGTH_LONG).show();
+      } else {
+        FLog.w(TAG, "Couldn't use native JSI/JNI synchronous call for onShouldStartLoadWithRequest due to missing JS runtime, falling back to old event-and-load");
+        dispatchEvent(
+          view,
+          new TopShouldStartLoadWithRequestEvent(
+            view.getId(),
+            createWebViewEvent(view, url)));
+        return true;
       }
-
-//      dispatchEvent(
-//        view,
-//        new TopShouldStartLoadWithRequestEvent(
-//          view.getId(),
-//          createWebViewEvent(view, url)));
-//      return true;
     }
 
 
