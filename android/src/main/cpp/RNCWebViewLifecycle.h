@@ -8,7 +8,8 @@ using namespace facebook;
 
 extern "C" {
   JNIEXPORT jboolean JNICALL
-  Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest(JNIEnv* env,
+  Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest(
+    JNIEnv* env,
     jobject thiz,
     jlong runtimePtr,
     jint viewId,
@@ -16,5 +17,6 @@ extern "C" {
     jboolean loading,
     jstring title,
     jboolean canGoBack,
-    jboolean canGoForward);
+    jboolean canGoForward
+  );
 }
