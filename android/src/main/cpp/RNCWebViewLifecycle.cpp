@@ -132,6 +132,7 @@ Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest
       return JNI_FALSE;
     }
   } else {
+    LOGE("Unexpected null JSI runtime found! Falling back to allowing request.");
     return JNI_FALSE;
   }
 }
