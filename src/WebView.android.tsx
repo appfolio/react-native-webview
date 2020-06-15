@@ -336,20 +336,27 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     const NativeWebView
       = (nativeConfig.component as typeof NativeWebViewAndroid) || RNCWebView;
 
-    const onShouldStartLoadWithRequest = (url: string) => {
+    const onShouldStartLoadWithRequest = (event: WebViewNavigationEvent) => {
       let shouldOverrideUrlLoading = false;
       createOnShouldStartLoadWithRequest(
-        (shouldStart) => { shouldOverrideUrlLoading = ! shouldStart },
+        (shouldStart, url) => {
+          if ('persist' in event && shouldStart) {
+            UIManager.dispatchViewManagerCommand(
+              this.getWebViewHandle(),
+              this.getCommands().loadUrl,
+              [String(url)],
+            );
+          } else {
+            shouldOverrideUrlLoading = ! shouldStart;
+          }
+        },
         // casting cause it's in the default props
         originWhitelist as readonly string[],
         onShouldStartLoadWithRequestProp,
-      )({ nativeEvent: { url }});
+      )(event);
 
       return shouldOverrideUrlLoading;
     }
-    // const onShouldStartLoadWithRequest = (url: string) => {
-    //   return false;
-    // }
 
     const setGlobalOnShouldStartLoadWithRequest = (key: string) => {
       // @ts-ignore

@@ -767,7 +767,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       JavaScriptContextHolder jsContext = ((ReactContext)view.getContext()).getJavaScriptContextHolder();
-      if (jsContext != null) {
+      if (jsContext.get() != 0) {
         synchronized(jsContext) {
           try {
             Lifecycle lifecycle = new Lifecycle();
