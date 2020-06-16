@@ -97,7 +97,7 @@ Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest
   JNIEnv* env,
   jobject thiz,
   jlong runtimePtr,
-  jint viewId,
+  jstring key,
   jstring url,
   jboolean loading,
   jstring title,
@@ -109,20 +109,16 @@ Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest
   auto *runtime = (jsi::Runtime *)runtimePtr; // TODO: use a c++ style cast
   if (runtime != nullptr) {
     auto rncWebViewGlobal = runtime->global().getPropertyAsObject(*runtime, "RNCWebView");
-    std::string functionName = "onShouldStartLoadWithRequest-" + std::to_string(viewId);
-    auto onShouldStartLoadWithRequest = rncWebViewGlobal.getPropertyAsFunction(*runtime, functionName.c_str());
+    auto onShouldStartLoadWithRequest = rncWebViewGlobal.getPropertyAsFunction(*runtime, env->GetStringUTFChars(key, 0));
     try {
-      auto nativeEvent = jsi::Object(*runtime);
-      nativeEvent.setProperty(*runtime, "url", jstring2string(env, url));
-      nativeEvent.setProperty(*runtime, "title", jstring2string(env, title));
-      nativeEvent.setProperty(*runtime, "loading", (bool)(loading == JNI_TRUE));
-      nativeEvent.setProperty(*runtime, "canGoBack", (bool)(canGoBack == JNI_TRUE));
-      nativeEvent.setProperty(*runtime, "canGoForward", (bool)(canGoForward == JNI_TRUE));
-
-      auto event = jsi::Object(*runtime);
-      event.setProperty(*runtime, "nativeEvent", nativeEvent);
-
-      auto result = onShouldStartLoadWithRequest.call(*runtime, event);
+      auto result = onShouldStartLoadWithRequest.call(
+        *runtime,
+        jstring2string(env, url),
+        jstring2string(env, title),
+        (bool)(loading == JNI_TRUE),
+        (bool)(canGoBack == JNI_TRUE),
+        (bool)(canGoForward == JNI_TRUE)
+      );
       return (jboolean)(result.getBool() ? JNI_TRUE : JNI_FALSE);
     } catch (...) {
       swallow_cpp_exception_and_throw_java(env);

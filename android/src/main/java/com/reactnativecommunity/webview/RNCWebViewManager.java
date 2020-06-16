@@ -414,6 +414,14 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     ((RNCWebView) view).setMessagingModuleName(moduleName);
   }
 
+  @ReactProp(name = "nativeOnShouldStartLoadWithRequestKey")
+  public void setNativeOnShouldStartLoadWithRequestKey(WebView view, String key) {
+    RNCWebViewClient client = ((RNCWebView) view).getRNCWebViewClient();
+    if (client != null && key != null) {
+      client.setNativeOnShouldStartLoadWithRequestKey(key);
+    }
+  }
+
   @ReactProp(name = "incognito")
   public void setIncognito(WebView view, boolean enabled) {
     // Remove all previous cookies
@@ -732,7 +740,9 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected boolean mLastLoadFailed = false;
     protected @Nullable
     ReadableArray mUrlPrefixesForDefaultIntent;
+    protected Lifecycle mLifecycle = new Lifecycle();
     protected RNCWebView.ProgressChangedFilter progressChangedFilter = null;
+    protected @Nullable String nativeOnShouldStartLoadWithRequestKey;
     protected @Nullable String ignoreErrFailedForThisURL = null;
 
     public void setIgnoreErrFailedForThisURL(@Nullable String url) {
@@ -767,17 +777,16 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       JavaScriptContextHolder jsContext = ((ReactContext)view.getContext()).getJavaScriptContextHolder();
-      if (jsContext.get() != 0) {
+      if (jsContext.get() != 0 && nativeOnShouldStartLoadWithRequestKey != null) {
         synchronized(jsContext) {
           try {
-            Lifecycle lifecycle = new Lifecycle();
             boolean loading = !mLastLoadFailed && view.getProgress() != 100;
             String title = view.getTitle();
             boolean canGoBack = view.canGoBack();
             boolean canGoForward = view.canGoForward();
-            return lifecycle.onShouldStartLoadWithRequest(
+            return ! mLifecycle.onShouldStartLoadWithRequest(
               jsContext.get(),
-              view.getId(),
+              nativeOnShouldStartLoadWithRequestKey,
               url,
               loading,
               title,
@@ -790,7 +799,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           }
         }
       } else {
-        FLog.w(TAG, "Couldn't use native JSI/JNI synchronous call for onShouldStartLoadWithRequest due to missing JS runtime, falling back to old event-and-load");
+        FLog.w(TAG, "Couldn't use native JSI/JNI synchronous call for onShouldStartLoadWithRequest due to missing JS runtime or native key, falling back to old event-and-load");
         dispatchEvent(
           view,
           new TopShouldStartLoadWithRequestEvent(
@@ -891,6 +900,10 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
     public void setProgressChangedFilter(RNCWebView.ProgressChangedFilter filter) {
       progressChangedFilter = filter;
+    }
+
+    public void setNativeOnShouldStartLoadWithRequestKey(String key) {
+      nativeOnShouldStartLoadWithRequestKey = key;
     }
   }
 
@@ -1043,6 +1056,8 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected boolean messagingEnabled = false;
     protected @Nullable
     String messagingModuleName;
+    protected @Nullable
+    String nativeOnShouldStartLoadWithRequestKey;
     protected @Nullable
     RNCWebViewClient mRNCWebViewClient;
     protected @Nullable

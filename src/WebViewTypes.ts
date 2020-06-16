@@ -235,6 +235,14 @@ export type OnShouldStartLoadWithRequest = (
   event: WebViewNavigation,
 ) => boolean;
 
+export type NativeOnShouldStartLoadWithRequest = (
+  url: string,
+  title: string,
+  loading: boolean,
+  canGoBack: boolean,
+  canGoForward: boolean,
+) => boolean;
+
 export interface CommonNativeWebViewProps extends ViewProps {
   cacheEnabled?: boolean;
   incognito?: boolean;
@@ -280,6 +288,7 @@ export interface AndroidNativeWebViewProps extends CommonNativeWebViewProps {
   textZoom?: number;
   thirdPartyCookiesEnabled?: boolean;
   messagingModuleName?: string;
+  nativeOnShouldStartLoadWithRequestKey?: string;
   readonly urlPrefixesForDefaultIntent?: string[];
 }
 

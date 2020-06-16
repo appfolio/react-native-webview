@@ -28,6 +28,7 @@ import {
   WebViewProgressEvent,
   AndroidWebViewProps,
   NativeWebViewAndroid,
+  NativeOnShouldStartLoadWithRequest,
   State,
   RNCWebViewUIManagerAndroid,
 } from './WebViewTypes';
@@ -70,19 +71,28 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
 
   startUrl: string | null = null;
 
+  disposeNativeOnShouldStartLoadWithRequest: (() => void) | null = null;
+
   state: State = {
     viewState: this.props.startInLoadingState ? 'LOADING' : 'IDLE',
     lastErrorEvent: null,
   };
 
-  onShouldStartLoadWithRequestKey: string | null = null;
-
-  webViewRef = React.createRef<NativeWebViewAndroid>() as React.MutableRefObject<NativeWebViewAndroid>;
+  webViewRef = React.createRef<NativeWebViewAndroid>();
 
   messagingModuleName = `WebViewMessageHandler${uniqueRef+=1}`;
 
+  nativeOnShouldStartLoadWithRequestKey = `onShouldStartLoadWithRequest-${uniqueRef+=1}`;
+
   componentDidMount = () => {
     BatchedBridge.registerCallableModule(this.messagingModuleName, this);
+  };
+
+  componentWillUnmount = () => {
+    if (this.disposeNativeOnShouldStartLoadWithRequest) {
+      this.disposeNativeOnShouldStartLoadWithRequest();
+      this.disposeNativeOnShouldStartLoadWithRequest = null;
+    }
   };
 
   getCommands = () => UIManager.getViewManagerConfig('RNCWebView').Commands;
@@ -195,10 +205,6 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     return nodeHandle as number;
   };
 
-  getOnShouldStartLoadWithRequestKey = () => {
-    return `onShouldStartLoadWithRequest-${this.getWebViewHandle()}`;
-  };
-
   onLoadingStart = (event: WebViewNavigationEvent) => {
     const { onLoadStart } = this.props;
     const { nativeEvent: { url } } = event;
@@ -273,19 +279,38 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     }
   };
 
-  onShouldStartLoadWithRequestCallback = (
+  legacyOnShouldStartLoadWithRequestCallback = (
     shouldStart: boolean,
+    url: string,
   ) => {
-    return ! shouldStart;
+    if (shouldStart) {
+      UIManager.dispatchViewManagerCommand(
+        this.getWebViewHandle(),
+        this.getCommands().loadUrl,
+        [String(url)],
+      );
+    }
   };
 
-  setNativeRef = (setGlobalOnShouldStartLoadWithRequest: (key: string) => void, ref: NativeWebViewAndroid) => {
-    this.webViewRef.current = ref;
-    if (ref) {
-      this.onShouldStartLoadWithRequestKey = this.getOnShouldStartLoadWithRequestKey();
-      // console.warn('this.onShouldStartLoadWithRequestKey', this.onShouldStartLoadWithRequestKey);
-      setGlobalOnShouldStartLoadWithRequest(this.onShouldStartLoadWithRequestKey);
+  setNativeOnShouldStartLoadWithRequest = (nativeOnShouldStartLoadWithRequest: NativeOnShouldStartLoadWithRequest) => {
+    // @ts-ignore
+    if (! global.RNCWebView) {
+      // @ts-ignore
+      global.RNCWebView = {};
     }
+
+    if (this.disposeNativeOnShouldStartLoadWithRequest) {
+      this.disposeNativeOnShouldStartLoadWithRequest();
+      this.disposeNativeOnShouldStartLoadWithRequest = null;
+    }
+
+    // @ts-ignore
+    global.RNCWebView[this.nativeOnShouldStartLoadWithRequestKey] = nativeOnShouldStartLoadWithRequest;
+
+    return () => {
+      // @ts-ignore
+      delete global.RNCWebView[this.nativeOnShouldStartLoadWithRequestKey];
+    };
   };
 
   render() {
@@ -336,40 +361,38 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     const NativeWebView
       = (nativeConfig.component as typeof NativeWebViewAndroid) || RNCWebView;
 
-    const onShouldStartLoadWithRequest = (event: WebViewNavigationEvent) => {
-      let shouldOverrideUrlLoading = false;
+    const nativeOnShouldStartLoadWithRequest: NativeOnShouldStartLoadWithRequest = (url, title, loading, canGoBack, canGoForward) => {
+      let shouldStart = true;
+      const event = {
+        nativeEvent: {
+          url,
+          title,
+          loading,
+          canGoBack,
+          canGoForward,
+        },
+      } as WebViewNavigationEvent;
+
       createOnShouldStartLoadWithRequest(
-        (shouldStart, url) => {
-          if ('persist' in event && shouldStart) {
-            UIManager.dispatchViewManagerCommand(
-              this.getWebViewHandle(),
-              this.getCommands().loadUrl,
-              [String(url)],
-            );
-          } else {
-            shouldOverrideUrlLoading = ! shouldStart;
-          }
+        (_shouldStart) => {
+          shouldStart = _shouldStart;
         },
         // casting cause it's in the default props
         originWhitelist as readonly string[],
         onShouldStartLoadWithRequestProp,
       )(event);
 
-      return shouldOverrideUrlLoading;
+      return shouldStart;
     }
 
-    const setGlobalOnShouldStartLoadWithRequest = (key: string) => {
-      // @ts-ignore
-      if (! global.RNCWebView) {
-        // @ts-ignore
-        global.RNCWebView = {};
-      }
-      // @ts-ignore
-      global.RNCWebView[key] = onShouldStartLoadWithRequest;
-    };
-    if (this.webViewRef.current && this.onShouldStartLoadWithRequestKey) {
-      setGlobalOnShouldStartLoadWithRequest(this.onShouldStartLoadWithRequestKey);
-    }
+    const legacyOnShouldStartLoadWithRequest = createOnShouldStartLoadWithRequest(
+      this.legacyOnShouldStartLoadWithRequestCallback,
+      // casting cause it's in the default props
+      originWhitelist as readonly string[],
+      onShouldStartLoadWithRequestProp,
+    );
+
+    this.disposeNativeOnShouldStartLoadWithRequest = this.setNativeOnShouldStartLoadWithRequest(nativeOnShouldStartLoadWithRequest);
 
     const webView = (
       <NativeWebView
@@ -377,15 +400,15 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
         {...otherProps}
         messagingEnabled={typeof onMessage === 'function'}
         messagingModuleName={this.messagingModuleName}
+        nativeOnShouldStartLoadWithRequestKey={this.nativeOnShouldStartLoadWithRequestKey}
         onLoadingError={this.onLoadingError}
         onLoadingFinish={this.onLoadingFinish}
         onLoadingProgress={this.onLoadingProgress}
         onLoadingStart={this.onLoadingStart}
         onHttpError={this.onHttpError}
         onMessage={this.onMessage}
-        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
-        // ref={this.webViewRef}
-        ref={this.setNativeRef.bind(this, setGlobalOnShouldStartLoadWithRequest)}
+        onShouldStartLoadWithRequest={legacyOnShouldStartLoadWithRequest}
+        ref={this.webViewRef}
         // TODO: find a better way to type this.
         source={resolveAssetSource(source as ImageSourcePropType)}
         style={webViewStyles}

@@ -12,7 +12,7 @@ extern "C" {
     JNIEnv* env,
     jobject thiz,
     jlong runtimePtr,
-    jint viewId,
+    jstring key,
     jstring url,
     jboolean loading,
     jstring title,
