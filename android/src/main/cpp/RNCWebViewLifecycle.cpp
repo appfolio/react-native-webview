@@ -111,14 +111,14 @@ Java_com_reactnativecommunity_webview_jsi_Lifecycle_onShouldStartLoadWithRequest
     auto rncWebViewGlobal = runtime->global().getPropertyAsObject(*runtime, "RNCWebView");
     auto onShouldStartLoadWithRequest = rncWebViewGlobal.getPropertyAsFunction(*runtime, env->GetStringUTFChars(key, 0));
     try {
-      auto result = onShouldStartLoadWithRequest.call(
-        *runtime,
-        jstring2string(env, url),
-        jstring2string(env, title),
-        (bool)(loading == JNI_TRUE),
-        (bool)(canGoBack == JNI_TRUE),
-        (bool)(canGoForward == JNI_TRUE)
-      );
+      auto nativeEvent = jsi::Object(*runtime);
+      nativeEvent.setProperty(*runtime, "url", jstring2string(env, url));
+      nativeEvent.setProperty(*runtime, "title", jstring2string(env, title));
+      nativeEvent.setProperty(*runtime, "loading", (bool)(loading == JNI_TRUE));
+      nativeEvent.setProperty(*runtime, "canGoBack", (bool)(canGoBack == JNI_TRUE));
+      nativeEvent.setProperty(*runtime, "canGoForward", (bool)(canGoForward == JNI_TRUE));
+
+      auto result = onShouldStartLoadWithRequest.call(*runtime, std::move(nativeEvent));
       return (jboolean)(result.getBool() ? JNI_TRUE : JNI_FALSE);
     } catch (...) {
       swallow_cpp_exception_and_throw_java(env);

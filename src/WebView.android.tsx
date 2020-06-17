@@ -23,6 +23,7 @@ import {
 import {
   WebViewErrorEvent,
   WebViewHttpErrorEvent,
+  WebViewJsiEvent,
   WebViewMessageEvent,
   WebViewNavigationEvent,
   WebViewProgressEvent,
@@ -361,17 +362,9 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
     const NativeWebView
       = (nativeConfig.component as typeof NativeWebViewAndroid) || RNCWebView;
 
-    const nativeOnShouldStartLoadWithRequest: NativeOnShouldStartLoadWithRequest = (url, title, loading, canGoBack, canGoForward) => {
+    const nativeOnShouldStartLoadWithRequest: NativeOnShouldStartLoadWithRequest = (nativeEvent: WebViewJsiEvent) => {
       let shouldStart = true;
-      const event = {
-        nativeEvent: {
-          url,
-          title,
-          loading,
-          canGoBack,
-          canGoForward,
-        },
-      } as WebViewNavigationEvent;
+      const event = {nativeEvent} as WebViewNavigationEvent;
 
       createOnShouldStartLoadWithRequest(
         (_shouldStart) => {

@@ -235,13 +235,15 @@ export type OnShouldStartLoadWithRequest = (
   event: WebViewNavigation,
 ) => boolean;
 
-export type NativeOnShouldStartLoadWithRequest = (
-  url: string,
-  title: string,
-  loading: boolean,
-  canGoBack: boolean,
-  canGoForward: boolean,
-) => boolean;
+export interface WebViewJsiEvent {
+  url: string;
+  loading: boolean;
+  title: string;
+  canGoBack: boolean;
+  canGoForward: boolean;
+}
+
+export type NativeOnShouldStartLoadWithRequest = (arg0: WebViewJsiEvent) => boolean;
 
 export interface CommonNativeWebViewProps extends ViewProps {
   cacheEnabled?: boolean;

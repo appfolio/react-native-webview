@@ -804,7 +804,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
             String title = view.getTitle();
             boolean canGoBack = view.canGoBack();
             boolean canGoForward = view.canGoForward();
-            return ! mLifecycle.onShouldStartLoadWithRequest(
+            boolean result = ! mLifecycle.onShouldStartLoadWithRequest(
               jsContext.get(),
               nativeOnShouldStartLoadWithRequestKey,
               url,
@@ -813,6 +813,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
               canGoBack,
               canGoForward
             );
+            return result;
           } catch (Exception e) {
             FLog.e(TAG, "Couldn't use native JSI/JNI synchronous call for onShouldStartLoadWithRequest, allowing load to happen", e);
             return false;
