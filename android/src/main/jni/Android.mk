@@ -5,7 +5,7 @@ include $(LOCAL_PATH)/common.mk
 
 REACT_NATIVE := $(call find-node-module,$(LOCAL_PATH),react-native)
 
-LOCAL_CPPFLAGS := -std=c++17
+LOCAL_CPPFLAGS := -std=c++14
 LOCAL_CPPFLAGS += -fexceptions
 LOCAL_CPPFLAGS += -frtti
 LOCAL_CPPFLAGS += -Wall
