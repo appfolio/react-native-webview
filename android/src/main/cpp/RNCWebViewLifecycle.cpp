@@ -64,11 +64,19 @@ void swallow_cpp_exception_and_throw_java(JNIEnv * env) {
   } catch(const std::ios_base::failure& rhs) { //sample translation
     // translate IO C++ exception to a Java exception
     NewJavaException(env, "java/io/IOException", rhs.what());
+  } catch(const jsi::JSError& e) {
+    NewJavaException(env, "java/lang/RuntimeException", e.what());
   } catch(const std::exception& e) {
     // translate unknown C++ exception to a Java exception
     NewJavaException(env, "java/lang/RuntimeException", e.what());
+  } catch(const jsi::JSError* e) {
+    NewJavaException(env, "java/lang/RuntimeException", e->what());
+  } catch(const std::exception* e) {
+    // translate unknown C++ exception to a Java exception
+    NewJavaException(env, "java/lang/RuntimeException", e->what());
   } catch(...) {
     // translate unknown C++ exception to a Java exception
+    throw;
     NewJavaException(env, "java/lang/Error", "Unknown exception type");
   }
 }
