@@ -1,6 +1,7 @@
 #pragma once
 
 #include <jni.h>
+#define JSI_EXPORT
 #include <jsi/jsi.h>
 
 // TODO: remove this and use specific types from namespace in cpp file

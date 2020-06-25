@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <cxxabi.h>
 
 #include "RNCWebViewLifecycle.h"
 
@@ -26,6 +27,12 @@
 #   define LOGE(...) printf("  *** Error:  ");printf(__VA_ARGS__); printf("\t -  <%s> \n", LOG_TAG);
 #   define LOGSIMPLE(...) printf(" ");printf(__VA_ARGS__);
 # endif // ANDROID
+
+const char* currentExceptionTypeName()
+{
+  int status;
+  return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
+}
 
 // This is how we represent a Java exception already in progress
 struct ThrownJavaException : std::runtime_error {
@@ -74,8 +81,13 @@ void swallow_cpp_exception_and_throw_java(JNIEnv * env) {
   } catch(const std::exception* e) {
     // translate unknown C++ exception to a Java exception
     NewJavaException(env, "java/lang/RuntimeException", e->what());
+  } catch(const std::runtime_error& e) {
+    // translate unknown C++ exception to a Java exception
+    NewJavaException(env, "java/lang/RuntimeException", "Wut?");
   } catch(...) {
     // translate unknown C++ exception to a Java exception
+    const char* name = currentExceptionTypeName();
+    (void)(name);
     throw;
     NewJavaException(env, "java/lang/Error", "Unknown exception type");
   }
