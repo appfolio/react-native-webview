@@ -2,7 +2,10 @@
 #include <stdexcept>
 #include <cxxabi.h>
 
+
 #include "RNCWebViewLifecycle.h"
+
+#include <jsi/jsi-inl.h>
 
 #define LOG_TAG "RNCWebViewLifecycle"
 

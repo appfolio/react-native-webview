@@ -14,11 +14,12 @@ LOCAL_CPPFLAGS += -Wall
 LOCAL_CPPFLAGS += -Wextra
 LOCAL_CPPFLAGS += -Werror
 
-LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS := -llog -L$(REACT_NATIVE)/ReactAndroid/build/tmp/buildReactNdkLib/local/arm64-v8a/libjscexecutor.so
+
 
 LOCAL_C_INCLUDES := $(REACT_NATIVE)/ReactCommon/jsi $(LOCAL_PATH)/../cpp
 
-# LOCAL_SRC_FILES += $(REACT_NATIVE)/ReactCommon/jsi/jsi/jsi.cpp
+LOCAL_SRC_FILES += $(REACT_NATIVE)/ReactCommon/jsi/jsi/jsi.cpp
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../cpp/*.cpp)
 
 LOCAL_MODULE := reactnativecommunity-webview
