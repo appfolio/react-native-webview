@@ -22,7 +22,7 @@ LOCAL_LDLIBS += /Users/tyler.coffman/Desktop/react-native-0.62.2/jni/arm64-v8a
 
 LOCAL_LDLIBS += -ljscexecutor
 
-LOCAL_C_INCLUDES := $(REACT_NATIVE)/ReactCommon/jsi $(LOCAL_PATH)/../cpp
+# LOCAL_C_INCLUDES := $(REACT_NATIVE)/ReactCommon/jsi $(LOCAL_PATH)/../cpp
 
 # LOCAL_SRC_FILES += $(REACT_NATIVE)/ReactCommon/jsi/jsi/jsi.cpp
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../cpp/*.cpp)
