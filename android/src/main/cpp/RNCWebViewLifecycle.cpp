@@ -56,6 +56,8 @@ struct NewJavaException : public ThrownJavaException{
 void swallow_cpp_exception_and_throw_java(JNIEnv * env) {
   try {
     throw;
+  } catch(const jsi::JSError& e) {
+    NewJavaException(env, "java/lang/Exception", e.what());
   } catch(const ThrownJavaException&) {
     // already reported to Java, ignore
   } catch(const std::bad_alloc& rhs) {

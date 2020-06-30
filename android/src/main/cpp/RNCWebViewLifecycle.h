@@ -1,7 +1,7 @@
 #pragma once
 
 #include <jni.h>
-#include <jsi/jsi.h>
+#include "jsi/jsi.h"
 
 // TODO: remove this and use specific types from namespace in cpp file
 using namespace facebook;
