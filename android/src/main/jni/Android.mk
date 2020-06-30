@@ -16,12 +16,12 @@ LOCAL_CPPFLAGS += -v
 LOCAL_DISABLE_FATAL_LINKER_WARNINGS := true
 LOCAL_LDLIBS := -llog
 
-LOCAL_LDLIBS += -L/Users/tyler.coffman/Desktop/react-native-0.62.2/jni/x86
-LOCAL_LDLIBS += -L/Users/tyler.coffman/Desktop/react-native-0.62.2/jni/x86_64
-LOCAL_LDLIBS += -L/Users/tyler.coffman/Desktop/react-native-0.62.2/jni/armeabi-v7a
-LOCAL_LDLIBS += -L/Users/tyler.coffman/Desktop/react-native-0.62.2/jni/arm64-v8a
+LOCAL_LDLIBS += -L$(BUILD_DIR)/_libraries/jni/$(APP_ABI)
 
-LOCAL_LDLIBS += -ljscexecutor
+LOCAL_LDLIBS += -v -ljscexecutor
+
+V := 1
+
 
 # LOCAL_C_INCLUDES := $(REACT_NATIVE)/ReactCommon/jsi $(LOCAL_PATH)/../cpp
 
