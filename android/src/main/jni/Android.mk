@@ -16,7 +16,7 @@ LOCAL_LDLIBS := -llog
 
 LOCAL_C_INCLUDES := $(REACT_NATIVE)/ReactCommon/jsi $(LOCAL_PATH)/../cpp
 
-LOCAL_SRC_FILES += $(REACT_NATIVE)/ReactCommon/jsi/jsi/jsi.cpp
+# LOCAL_SRC_FILES += $(REACT_NATIVE)/ReactCommon/jsi/jsi/jsi.cpp
 LOCAL_SRC_FILES += $(wildcard $(LOCAL_PATH)/../cpp/*.cpp)
 
 LOCAL_MODULE := reactnativecommunity-webview
