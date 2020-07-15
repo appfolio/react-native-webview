@@ -34,13 +34,19 @@ def getExtOrIntegerDefault(name) {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
-task extractSo(type: Copy) {
-  from zipTree("${project.rootDir}/../node_modules/react-native/android/com/facebook/react/react-native/0.62.2/react-native-0.62.2.aar")
+def findReactNativeAAR() {
+  def ft = fileTree("${getReactNativeAndroidRoot()}/com/facebook/react/react-native") {
+    include '**/*.aar'
+  }
+  ft.getSingleFile()
+}
+
+task extractAARForNDKBuild(type: Copy) {
+  from zipTree(findReactNativeAAR())
   into "${buildDir}/_libraries/"
   include "jni/**/libjscexecutor.so"
-
 }
-preBuild.dependsOn(extractSo)
+preBuild.dependsOn(extractAARForNDKBuild)
 
 
 android {
@@ -85,31 +91,21 @@ android {
   }
 }
 
-repositories {
-  mavenCentral()
-  jcenter()
-  google()
-
+def getReactNativeAndroidRoot() {
   def found = false
-  def defaultDir = null
-  def androidSourcesName = 'React Native sources'
+  def reactNativeAndroidRoot = null
 
   if (rootProject.ext.has('reactNativeAndroidRoot')) {
-    defaultDir = rootProject.ext.get('reactNativeAndroidRoot')
+    reactNativeAndroidRoot = rootProject.ext.get('reactNativeAndroidRoot')
   } else {
-    defaultDir = new File(
+    reactNativeAndroidRoot = new File(
       projectDir,
       '/../../../node_modules/react-native/android'
     )
   }
 
-  if (defaultDir.exists()) {
-    maven {
-      url defaultDir.toString()
-      name androidSourcesName
-    }
-
-    logger.info(":${project.name}:reactNativeAndroidRoot ${defaultDir.canonicalPath}")
+  if (reactNativeAndroidRoot.exists()) {
+    logger.info(":${project.name}:reactNativeAndroidRoot ${reactNativeAndroidRoot.canonicalPath}")
     found = true
   } else {
     def parentDir = rootProject.projectDir
@@ -118,6 +114,7 @@ repositories {
       if (found) return true
       parentDir = parentDir.parentFile
 
+      // See github issue #218 and PR #238 to understand this
       def androidSourcesDir = new File(
         parentDir,
         'node_modules/react-native'
@@ -129,20 +126,12 @@ repositories {
       )
 
       if (androidPrebuiltBinaryDir.exists()) {
-        maven {
-          url androidPrebuiltBinaryDir.toString()
-          name androidSourcesName
-        }
-
         logger.info(":${project.name}:reactNativeAndroidRoot ${androidPrebuiltBinaryDir.canonicalPath}")
+        reactNativeAndroidRoot = androidPrebuiltBinaryDir
         found = true
       } else if (androidSourcesDir.exists()) {
-        maven {
-          url androidSourcesDir.toString()
-          name androidSourcesName
-        }
-
         logger.info(":${project.name}:reactNativeAndroidRoot ${androidSourcesDir.canonicalPath}")
+        reactNativeAndroidRoot = androidPrebuiltBinaryDir
         found = true
       }
     })
@@ -153,6 +142,20 @@ repositories {
       "${project.name}: unable to locate React Native android sources. " +
         "Ensure you have you installed React Native as a dependency in your project and try again."
     )
+  }
+
+  return reactNativeAndroidRoot.toString()
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+  google()
+
+  def androidSourcesName = 'React Native sources'
+  maven {
+    url getReactNativeAndroidRoot()
+    name androidSourcesName
   }
 }
 
