@@ -366,18 +366,14 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
       let shouldStart = true;
       const event = {nativeEvent} as WebViewNavigationEvent;
 
-      try {
-        createOnShouldStartLoadWithRequest(
-          (_shouldStart) => {
-            shouldStart = _shouldStart;
-          },
-          // casting cause it's in the default props
-          originWhitelist as readonly string[],
-          onShouldStartLoadWithRequestProp,
-        )(event);
-      } catch (e) {
-        console.error(e);
-      }
+      createOnShouldStartLoadWithRequest(
+        (_shouldStart) => {
+          shouldStart = _shouldStart;
+        },
+        // casting cause it's in the default props
+        originWhitelist as readonly string[],
+        onShouldStartLoadWithRequestProp,
+      )(event);
 
       return shouldStart;
     }
