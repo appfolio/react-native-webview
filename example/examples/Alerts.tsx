@@ -63,8 +63,13 @@ export default class Alerts extends Component<Props, State> {
     return (
       <View style={{ height: 120 }}>
         <WebView
-          source={{html: HTML}}
+          source={{uri: 'https://www.7-zip.org/download.html'}}
           automaticallyAdjustContentInsets={false}
+          onShouldStartLoadWithRequest={(navState) => {
+            throw new Error("HAHA");
+            console.log("LOL");
+            return true;
+          }}
         />
       </View>
     );
