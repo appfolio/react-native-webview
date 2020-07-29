@@ -50,6 +50,7 @@ preBuild.dependsOn(extractAARForNDKBuild)
 
 
 android {
+  ndkVersion "19.2.5345600"
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
   buildToolsVersion getExtOrDefault('buildToolsVersion')
   defaultConfig {
