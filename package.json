@@ -30,7 +30,7 @@
   },
   "peerDependencies": {
     "react": "16.11.0",
-    "react-native": ">=0.60 <0.63"
+    "react-native": ">=0.60 <0.64"
   },
   "dependencies": {
     "escape-string-regexp": "2.0.0",
@@ -46,7 +46,7 @@
     "@types/invariant": "^2.2.30",
     "@types/jest": "24.0.18",
     "@types/react": "16.9.34",
-    "@types/react-native": "0.62.5",
+    "@types/react-native": "0.63.2",
     "@types/selenium-webdriver": "4.0.9",
     "@typescript-eslint/eslint-plugin": "2.1.0",
     "@typescript-eslint/parser": "2.1.0",
@@ -64,7 +64,7 @@
     "metro": "0.56.4",
     "metro-react-native-babel-preset": "^0.59.0",
     "react": "16.11.0",
-    "react-native": "0.62.2",
+    "react-native": "0.0.0-16ea9ba81",
     "react-native-macos": "0.60.0-microsoft.73",
     "react-native-windows": "^0.62.0-0",
     "semantic-release": "15.13.24",
