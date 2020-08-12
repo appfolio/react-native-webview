@@ -52,6 +52,7 @@ preBuild.dependsOn(extractAARForNDKBuild)
 android {
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
   buildToolsVersion getExtOrDefault('buildToolsVersion')
+  ndkVersion '19.2.5345600'
   defaultConfig {
     minSdkVersion 16
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
